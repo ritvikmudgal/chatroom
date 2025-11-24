@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChatRoom - Connect with Anyone</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+</head>
+<body>
+    <!-- Login/Signup Page -->
+    <div id="authPage" class="auth-page active">
+        <div class="auth-container">
+            <div class="auth-header">
+                <h1>ChatRoom</h1>
+                <p>Connect and chat with anyone in real-time</p>
+            </div>
+
+            <!-- Login Form -->
+            <div id="loginForm" class="auth-form active">
+                <h2>Welcome Back!</h2>
+                
+                <!-- Social Login Buttons -->
+                <div class="social-login">
+                    <button class="social-btn google-btn" onclick="loginWithGoogle()">
+                        <span>🔍</span> Continue with Google
+                    </button>
+                    <button class="social-btn phone-btn" onclick="showPhoneLogin()">
+                        <span>📱</span> Continue with Phone
+                    </button>
+                </div>
+
+                <div class="divider">
+                    <span>OR</span>
+                </div>
+
+                <!-- Email Login -->
+                <form onsubmit="handleLogin(event)">
+                    <input type="text" id="loginUsername" placeholder="Username or Email" required>
+                    <input type="password" id="loginPassword" placeholder="Password" required>
+                    
+                    <!-- reCAPTCHA -->
+                    <div class="g-recaptcha" data-sitekey="6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI"></div>
+                    
+                    <button type="submit" class="auth-btn">Login</button>
+                </form>
+
+                <p class="auth-switch">
+                    Don't have an account? <span onclick="switchToSignup()">Sign Up</span>
+                </p>
+            </div>
+
+            <!-- Signup Form -->
+            <div id="signupForm" class="auth-form">
+                <h2>Create Account</h2>
+                
+                <!-- Social Signup -->
+                <div class="social-login">
+                    <button class="social-btn google-btn" onclick="loginWithGoogle()">
+                        <span>🔍</span> Sign up with Google
+                    </button>
+                    <button class="social-btn phone-btn" onclick="showPhoneLogin()">
+                        <span>📱</span> Sign up with Phone
+                    </button>
+                </div>
+
+                <div class="divider">
+                    <span>OR</span>
+                </div>
+
+                <!-- Email Signup -->
+                <form onsubmit="handleSignup(event)">
+                    <input type="text" id="signupUsername" placeholder="Username" required minlength="3">
+                    <input type="email" id="signupEmail" placeholder="Email" required>
+                    <input type="password" id="signupPassword" placeholder="Password" required minlength="6">
+                    <input type="password" id="signupConfirmPassword" placeholder="Confirm Password" required>
+                    
+                    <!-- reCAPTCHA -->
+                    <div class="g-recaptcha" data-sitekey="6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI"></div>
+                    
+                    <button type="submit" class="auth-btn">Sign Up</button>
+                </form>
+
+                <p class="auth-switch">
+                    Already have an account? <span onclick="switchToLogin()">Login</span>
+                </p>
+            </div>
+
+            <!-- Phone Login Form -->
+            <div id="phoneForm" class="auth-form">
+                <h2>Phone Login</h2>
+                <form onsubmit="handlePhoneLogin(event)">
+                    <input type="tel" id="phoneNumber" placeholder="+1 234 567 8900" required>
+                    <div id="recaptcha-container"></div>
+                    <button type="submit" class="auth-btn">Send OTP</button>
+                </form>
+                <div id="otpSection" style="display: none;">
+                    <input type="text" id="otpCode" placeholder="Enter OTP" maxlength="6">
+                    <button onclick="verifyOTP()" class="auth-btn">Verify OTP</button>
+                </div>
+                <p class="auth-switch">
+                    <span onclick="switchToLogin()">Back to Login</span>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Chat Application -->
+    <div id="chatApp" class="chat-app">
+        <!-- Navbar -->
+        <nav class="navbar">
+            <div class="nav-brand">💬 ChatRoom</div>
+            <div class="nav-user">
+                <span id="currentUsername"></span>
+                <button class="nav-btn" onclick="showProfile()">Profile</button>
+                <button class="nav-btn" onclick="logout()">Logout</button>
+            </div>
+        </nav>
+
+        <!-- Main Chat Container -->
+        <div class="chat-container">
+            <!-- Sidebar -->
+            <div class="sidebar">
+                <div class="sidebar-header">
+                    <h3>Conversations</h3>
+                    <button class="add-btn" onclick="showAddUserModal()">+</button>
+                </div>
+
+                <div class="search-box">
+                    <input type="text" id="searchUsers" placeholder="Search conversations..." oninput="searchConversations()">
+                </div>
+
+                <div class="chat-list" id="chatList">
+                    <!-- Chat items will be loaded here -->
+                </div>
+            </div>
+
+            <!-- Chat Area -->
+            <div class="chat-area">
+                <div class="chat-empty" id="chatEmpty">
+                    <div class="empty-state">
+                        <h2>👋 Welcome to ChatRoom!</h2>
+                        <p>Select a conversation or add someone to start chatting</p>
+                    </div>
+                </div>
+
+                <div class="active-chat" id="activeChat" style="display: none;">
+                    <div class="chat-header">
+                        <div class="chat-header-info">
+                            <h3 id="activeChatName"></h3>
+                            <span class="online-status" id="onlineStatus"></span>
+                        </div>
+                    </div>
+
+                    <div class="messages-container" id="messagesContainer">
+                        <!-- Messages will appear here -->
+                    </div>
+
+                    <div class="message-input-container">
+                        <input type="text" id="messageInput" placeholder="Type a message..." onkeypress="handleEnterKey(event)">
+                        <button onclick="sendMessage()" class="send-btn">Send</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add User Modal -->
+    <div id="addUserModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeAddUserModal()">&times;</span>
+            <h2>Add New Chat</h2>
+            <input type="text" id="searchUsername" placeholder="Enter username" oninput="searchUsers()">
+            <div id="userSearchResults" class="search-results"></div>
+        </div>
+    </div>
+
+    <!-- Profile Modal -->
+    <div id="profileModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeProfileModal()">&times;</span>
+            <h2>Profile</h2>
+            <div class="profile-info">
+                <div class="profile-avatar">👤</div>
+                <h3 id="profileUsername"></h3>
+                <p id="profileEmail"></p>
+                <div class="profile-stats">
+                    <div class="stat">
+                        <strong id="totalChats">0</strong>
+                        <span>Chats</span>
+                    </div>
+                    <div class="stat">
+                        <strong id="totalMessages">0</strong>
+                        <span>Messages</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="client.js"></script>
+</body>
+</html>
